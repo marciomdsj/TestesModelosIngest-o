@@ -1,0 +1,139 @@
+# 🤖 Plataforma de Teste de Modelos de Ingestão de PDF
+
+Uma ferramenta de benchmark para avaliar e comparar o desempenho, custo e precisão de diferentes modelos de Inteligência Artificial na tarefa de extração de dados e resposta a perguntas (Q&A) a partir de documentos PDF, incluindo aqueles com texto digital, imagens ou ambos.
+
+## 🎯 Conceito Central: Quantificando o *Trade-Off*
+
+O objetivo deste projeto não é encontrar um único "melhor" modelo, mas sim criar uma plataforma que permita **quantificar os trade-offs** entre diferentes abordagens de ingestão de documentos. A ferramenta foi projetada para responder a perguntas críticas de negócio e engenharia com dados concretos:
+
+* **Custo vs. Benefício:** Um modelo pago é 30% mais preciso, mas 500% mais caro. O ganho justifica o custo para este caso de uso?
+* **Latência vs. UX:** Uma resposta local e instantânea, mesmo que menos precisa, é melhor para a experiência do usuário do que uma resposta mais lenta via API?
+* **Privacidade vs. Poder:** Os documentos contêm dados sensíveis? Se sim, um modelo local que não expõe dados a terceiros é a única opção viável?
+
+Esta plataforma transforma "achismo" em uma análise de custo-benefício baseada em evidências.
+
+## ✨ Features
+
+* **Interface Web Interativa:** Criada com Streamlit para uma experiência de usuário amigável, permitindo upload de arquivos e configuração de testes sem tocar no código.
+* **Backend Robusto:** Uma API construída com FastAPI gerencia a lógica de orquestração dos testes de forma escalável.
+* **Arquitetura Plugável:** Adicionar novos modelos de IA é simples, bastando implementar uma classe abstrata e registrá-la no servidor.
+* **Avaliação Inteligente com "IA como Juiz":** Utiliza um LLM (ex: `gpt-4o`) para avaliar semanticamente as respostas dos modelos testados, superando a limitação de uma simples comparação de texto exato.
+* **Dashboard de Resultados:** Apresenta uma comparação lado a lado em um scorecard de resumo e uma tabela detalhada com métricas de:
+    * **Precisão** (avaliada pelo "juiz")
+    * **Latência** (em milissegundos)
+    * **Custo Estimado** (em USD)
+
+## 🏛️ Arquitetura
+
+O sistema opera em uma arquitetura cliente-servidor:
+
+1.  **Frontend (Cliente):** Um dashboard desenvolvido em **Streamlit** (`dashboard.py`) que serve como interface gráfica para o usuário.
+2.  **Backend (Servidor):** Uma API RESTful desenvolvida em **FastAPI** (`main.py`) que recebe as requisições, orquestra a execução dos diferentes modelos de IA e retorna os resultados consolidados.
+
+![Arquitetura do Sistema](https://i.imgur.com/gK9x8C0.png)
+
+## 📂 Estrutura do Projeto
+
+```
+.
+├── dashboard.py             # Aplicação frontend com Streamlit
+├── main.py                  # Servidor backend com FastAPI
+├── orchestrator.py          # Lógica que gerencia a execução dos testes e o "IA como Juiz"
+├── schemas.py               # Modelos Pydantic para a API
+├── models/
+│   ├── base_model.py        # Interface abstrata para todos os modelos
+│   ├── local_ocr_model.py   # Modelo local com PyMuPDF + Tesseract
+│   └── openai_vision_model.py # Modelo multimodal da OpenAI
+├── tests/
+│   └── (coloque seus PDFs de teste aqui)
+├── .env.example             # Template para variáveis de ambiente
+├── requirements.txt         # Dependências Python
+└── README.md
+```
+
+## 🛠️ Setup e Instalação
+
+Siga os passos abaixo para configurar e rodar o projeto localmente.
+
+### 1. Pré-requisitos de Sistema
+
+Além do Python 3.9+, você precisará de duas ferramentas de sistema para processamento de PDFs e OCR:
+
+* **Poppler:** Necessário para a biblioteca `pdf2image`.
+* **Tesseract OCR:** O motor de OCR para o modelo local.
+
+**No macOS (usando Homebrew):**
+```bash
+brew install poppler tesseract tesseract-lang
+```
+
+**No Linux (Debian/Ubuntu):**
+```bash
+sudo apt-get update
+sudo apt-get install poppler-utils tesseract-ocr tesseract-ocr-por
+```
+
+**No Windows:**
+* Instale o [Poppler para Windows](https://github.com/oschwartz10612/poppler-windows/releases/) e adicione a pasta `bin` ao seu PATH.
+* Instale o [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) e adicione seu diretório de instalação ao PATH.
+
+### 2. Configuração do Projeto Python
+
+```bash
+# 1. Clone o repositório
+git clone <url-do-seu-repositorio>
+cd <nome-da-pasta>
+
+# 2. Crie e ative um ambiente virtual
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3. Instale as dependências Python
+pip install -r requirements.txt
+
+# 4. Configure as variáveis de ambiente
+# Copie o arquivo de exemplo
+cp .env.example .env
+
+# Edite o arquivo .env e adicione sua chave da OpenAI
+# OPENAI_API_KEY="sk-..."
+```
+
+## 🚀 Como Rodar
+
+Você precisará de **dois terminais**, ambos com o ambiente virtual ativado.
+
+**No Terminal 1 - Inicie o Servidor Backend:**
+```bash
+uvicorn main:app --reload
+```
+Aguarde a mensagem indicando que o servidor está rodando em `http://127.0.0.1:8000`.
+
+**No Terminal 2 - Inicie o Dashboard Frontend:**
+```bash
+streamlit run dashboard.py
+```
+Seu navegador abrirá automaticamente com a interface da aplicação.
+
+## 📋 Como Usar
+
+1.  Acesse o dashboard no seu navegador.
+2.  Na coluna da esquerda, **faça o upload** de um arquivo PDF.
+3.  **Selecione os modelos** que deseja comparar.
+4.  Na tabela "Defina as Perguntas e Respostas Esperadas", **adicione as perguntas** e as respostas de referência (gabarito) para o seu documento.
+5.  Clique no botão **"Executar Teste"**.
+6.  Aguarde o processamento e analise os resultados na coluna da direita.
+
+## 🧩 Como Estender (Adicionar Novos Modelos)
+
+A arquitetura foi projetada para ser extensível. Para adicionar um novo modelo:
+
+1.  Crie um novo arquivo em `models/`, por exemplo `models/meu_novo_modelo.py`.
+2.  Dentro dele, crie uma classe que herda de `IngestionModel` (definida em `models/base_model.py`) e implemente o método `ingest_and_query`.
+3.  Abra o `main.py`, importe sua nova classe e adicione uma instância dela ao dicionário `AVAILABLE_MODELS`.
+
+O servidor irá recarregar e seu novo modelo aparecerá automaticamente como uma opção no dashboard Streamlit.
+
+## 📄 Licença
+
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
