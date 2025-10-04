@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart  # Essencial para upload de arquivos
+pydantic
+
+# Nossos modelos de ingestão
+openai
+google-cloud-documentai
+PyMuPDF
+pytesseract
+pillow
+pdf2image
+streamlit
+pandas
