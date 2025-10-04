@@ -6,8 +6,7 @@ import os
 API_URL = "http://127.0.0.1:8000/test/pdf"
 MODELS_TO_RUN = ["local_ocr", "openai_gpt4o"] #Adicionar mais modelos caso queira
 
-# --- LISTA DE TESTES (AQUI VOCÊ CONFIGURA TUDO) ---
-# Adicione um dicionário para cada PDF que você quer testar.
+# # Adicione um dicionário para cada PDF que você quer testar.
 # Preencha o 'pdf_path' e as 'questions' para cada um.
 # -----------------------------------------------------------
 TEST_SUITE = [

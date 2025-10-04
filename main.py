@@ -1,5 +1,3 @@
-# main.py (VERSÃO CORRIGIDA)
-
 import os
 import json
 import tempfile
@@ -38,8 +36,6 @@ async def run_pdf_test(
     Recebe um PDF, um conjunto de perguntas/respostas e uma lista de modelos.
     Executa os testes e retorna um resumo comparativo.
     """
-    # --- MUDANÇA AQUI ---
-    # Convertemos a string recebida em uma lista de nomes de modelos.
     model_name_list = [name.strip() for name in models_to_run.split(',')]
 
     # Validação dos modelos solicitados

@@ -1,5 +1,3 @@
-# dashboard.py (VERSÃO COMPLETA E FUNCIONAL)
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -14,7 +12,6 @@ st.set_page_config(
 )
 
 # --- Constantes e Configurações ---
-# CORREÇÃO: Usando http em vez de https para o servidor local
 API_URL = "http://127.0.0.1:8000"
 
 # --- Funções de Lógica ---
